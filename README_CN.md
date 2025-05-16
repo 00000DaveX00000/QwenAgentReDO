@@ -182,6 +182,19 @@ Qwen-Agent中MCP调用格式：
     }
 }
 ```
+如果远端 MCP 服务提供支持流式 HTTP（如 SSE）的接口，可以通过添加 `"protocol": "streamable_http"` 并提供 `url` 来连接。
+MCP 管理器会调用 `mcp.client.streamable_http.streamablehttp_client` 建立连接：
+
+```
+{
+    "mcpServers": {
+        "amap": {
+            "protocol": "streamable_http",
+            "url": "https://mcp.example.com/sse"
+        }
+    }
+}
+```
 具体可参考[MCP使用例子](./examples/assistant_mcp_sqlite_bot.py)
 
 运行该例子需要额外安装的依赖有：

@@ -99,6 +99,9 @@ class MCPManager:
                 # "headers" must be a dictionary
                 if 'headers' in server and not isinstance(server['headers'], dict):
                     return False
+            if 'protocol' in server:
+                if server['protocol'] not in {'streamable_http'}:
+                    return False
             # If the "env" key exists, it must be a dictionary
             if 'env' in server and not isinstance(server['env'], dict):
                 return False
@@ -226,9 +229,19 @@ class MCPClient:
         from mcp import ClientSession, StdioServerParameters
         from mcp.client.stdio import stdio_client
         from mcp.client.sse import sse_client
+        from mcp.client.streamable_http import streamablehttp_client
         """Connect to an MCP server and retrieve the available tools."""
         try:
-            if 'url' in mcp_server:
+            if mcp_server.get('protocol') == 'streamable_http':
+                self._streams_context = streamablehttp_client(
+                    url=mcp_server.get('url'),
+                    headers=mcp_server.get('headers', {"Accept": "text/event-stream"}),
+                )
+                transport = await self.exit_stack.enter_async_context(self._streams_context)
+                read_stream, write_stream, _ = transport
+                self._session_context = ClientSession(read_stream, write_stream)
+                self.session = await self.exit_stack.enter_async_context(self._session_context)
+            elif 'url' in mcp_server:
                 self._streams_context = sse_client(url=mcp_server.get('url'), headers=mcp_server.get('headers', {"Accept": "text/event-stream"}))
                 streams = await self.exit_stack.enter_async_context(self._streams_context)
                 self._session_context = ClientSession(*streams)

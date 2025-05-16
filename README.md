@@ -188,6 +188,18 @@ Example of MCP invocation format:
         }
     }
 }
+```If a remote MCP server exposes a streamable HTTP endpoint, set `"protocol": "streamable_http"` together with a `url`.
+The manager will connect using `mcp.client.streamable_http.streamablehttp_client`:
+
+```
+{
+    "mcpServers": {
+        "amap": {
+            "protocol": "streamable_http",
+            "url": "https://mcp.example.com/sse"
+        }
+    }
+}
 ```
 For more details, you can refer to the [MCP usage example](./examples/assistant_mcp_sqlite_bot.py)
 
