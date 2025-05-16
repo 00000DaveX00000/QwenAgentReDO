@@ -235,10 +235,10 @@ class MCPClient:
             if mcp_server.get('protocol') == 'streamable_http':
                 self._streams_context = streamablehttp_client(
                     url=mcp_server.get('url'),
-                    headers=mcp_server.get('headers', {"Accept": "text/event-stream"}),
+                    headers=mcp_server.get('headers', {"Accept": "application/json, text/event-stream", "Content-Type": "application/json"}),
                 )
-                transport = await self.exit_stack.enter_async_context(self._streams_context)
-                read_stream, write_stream, _ = transport
+                # streamablehttp_client返回三个值：read_stream, write_stream, get_session_id_callback
+                read_stream, write_stream, get_session_id = await self.exit_stack.enter_async_context(self._streams_context)
                 self._session_context = ClientSession(read_stream, write_stream)
                 self.session = await self.exit_stack.enter_async_context(self._session_context)
             elif 'url' in mcp_server:
